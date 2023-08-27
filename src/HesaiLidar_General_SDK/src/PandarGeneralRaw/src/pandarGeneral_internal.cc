@@ -12,6 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+
+ * Edit by ry
  *****************************************************************************/
 
 #include <sstream>
@@ -771,12 +773,13 @@ void PandarGeneral_Internal::ProcessLiarPacket() {
     return;
 
   while (enable_lidar_process_thr_) {
-    if (!m_PacketsBuffer.hasEnoughPackets()) {
+    boost::this_thread::interruption_point();
+    PandarPacket packet;
+    if (!m_PacketsBuffer.pop(packet))
+    {
       usleep(1000);
       continue;
     }
-    PandarPacket packet = *(m_PacketsBuffer.getIterCalc());
-    m_PacketsBuffer.moveIterCalc();
     rawpacket.stamp.sec = floor(packet.stamp);
     rawpacket.stamp.nsec = (packet.stamp - floor(packet.stamp))*1000000000;
     rawpacket.size = packet.size;
